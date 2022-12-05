@@ -1,0 +1,475 @@
+# Profiling and Analyzing the Yelp Dataset
+
+<img src="Yelp Dataset ER Diagram.png" alt="Yelp Dataset" title="ER Diagram">
+
+## Part 1: Yelp Dataset Profiling and Understanding.
+
+1. Profile the data by finding the total number of records for each of the tables below:
+	
+- i. Attribute table = 10000
+- ii. Business table = 10000
+- iii. Category table = 10000
+- iv. Checkin table = 10000
+- v. elite_years table = 10000
+- vi. friend table = 10000
+- vii. hours table = 10000
+- viii. photo table = 10000 
+- ix. review table = 10000 
+- x. tip table = 10000
+- xi. user table = 10000
+
+### SQL code used to arrive at answer:
+```
+SELECT COUNT(*)
+FROM table_name (Table names are found in the schema.)
+```
+
+******************************************************************************************************************************************************************
+
+2. Find the total distinct records by either the foreign key or primary key for each table. If two foreign keys are listed in the table, please specify which foreign key.
+
+- i. Business = 10000 (id)
+- ii. Hours = 1562 (business_id) 
+- iii. Category = 2643 (business_id_
+- iv. Attribute = 1115 (business_id)
+- v. Review = 10000 (id) , 8090 (business_id)
+- vi. Checkin = 493 (business_id)
+- vii. Photo = 10000 (id), 6493 (business_id)
+- viii. Tip = 537 (user_id), 3979 (business_id)
+- ix. User = 10000 (id)
+- x. Friend = 11 (user_id)
+- xi. Elite_years = 2780 (user_id)
+
+*Note: Primary Keys are denoted in the ER-Diagram with a yellow key icon.*
+
+### SQL code used to arrive at answer:
+```
+SELECT COUNT(DISTINCT(key))
+FROM table_name (Table names are found in the schema.)
+```
+******************************************************************************************************************************************************************
+
+3. Are there any columns with null values in the Users table? Indicate "yes," or "no."
+
+- Answer: No
+
+### SQL code used to arrive at answer:
+``` 
+SELECT *
+FROM user
+WHERE id IS NULL  OR name IS NULL 
+    OR review_count IS NULL OR yelping_since IS NULL
+	OR useful IS NULL OR funny IS NULL
+	OR cool IS NULL OR fans IS NULL
+	OR average_stars IS NULL OR compliment_hot IS NULL
+	OR compliment_more IS NULL OR compliment_profile IS NULL
+	OR compliment_cute IS NULL OR compliment_list IS NULL
+	OR compliment_note IS NULL OR compliment_plain IS NULL
+	OR compliment_cool IS NULL OR compliment_funny IS NULL
+	OR compliment_writer IS NULL OR compliment_photos IS NULL;
+ ```                                 
+******************************************************************************************************************************************************************
+	
+4. For each table and column listed below, display the smallest (minimum), largest (maximum), and average (mean) value for the following fields:
+
+i. Table: Review, Column: Stars
+
+    min:1	     max:	5	   avg:3.7082
+
+ii. Table: Business, Column: Stars
+
+    min:1.0		 max:5.0       avg:3.6549
+
+iii. Table: Tip, Column: Likes
+
+    min:0		 max:2		   avg:0.0144
+
+iv. Table: Checkin, Column: Count
+
+    min:1		 max:53		   avg:1.9414
+
+v. Table: User, Column: Review_count
+
+    min:0		 max:200	   avg:24.2995
+
+### SQL code used to arrive at answer:
+```
+SELECT min(stars),max (stars), avg(stars)
+FROM table_name
+```
+******************************************************************************************************************************************************************
+
+5. List the cities with the most reviews in descending order:
+
+### SQL code used to arrive at answer:
+```
+SELECT city, sum(review_count)
+FROM business
+GROUP BY city
+ORDER BY sum(review_count) DESC;
+```	
+
+
+| city             | NoOfReviews |
+|------------------|--------------|
+| Las Vegas        |        3873 |
+| Montréal         |        1757 |
+| Gilbert          |        1549 |
+| Scottsdale       |         823 |
+| Henderson        |         785 |
+| Toronto          |         778 |
+| Cleveland        |         723 |
+| Charlotte        |         715 |
+| Phoenix          |         711 |
+| Mississauga      |         683 |
+
+
+(Output limit exceeded, 10 of 362 total rows shown)
+
+******************************************************************************************************************************************************************
+	
+6. Find the distribution of star ratings to the business in the following cities:
+
+i. Avon
+
+## SQL code used to arrive at answer:
+
+```
+SELECT stars AS StarRating ,count(stars) AS frequency
+FROM business
+WHERE city = 'Avon'
+GROUP BY stars;
+```
+| StarRating | frequency    |
+|------------| -------------|
+|        1.5 |            1 |
+|        2.5 |            2 |
+|        3.5 |            3 |
+|        4.0 |            2 |
+|        4.5 |            1 |
+|        5.0 |            1 |
+
+
+******************************************************************************************************************************************************************
+
+ii. Beachwood
+
+### SQL code used to arrive at answer:
+
+```
+SELECT stars AS StarRating, count(stars) AS frequency
+FROM business 
+WHERE city = 'Beachwood'
+GROUP BY stars;
+```
+
+| stars | frequency |
+|-------|-----------|
+|   5.0 |         5 |
+|   3.0 |         2 |
+|   3.5 |         2 |
+|   4.5 |         2 |
+|   2.0 |         1 |
+|   2.5 |         1 |
+|   4.0 |         1 |
+
+
+******************************************************************************************************************************************************************
+
+7. Find the top 3 users based on their total number of reviews:
+		
+### SQL code used to arrive at answer:
+
+```
+SELECT name ,review_count AS tota_review
+FROM user
+ORDER BY review_count DESC limit 3;
+```
+		
+
+| name   | tota_review |
+|--------|-------------|
+| Gerald |        2000 |
+| Sara   |        1629 |
+| Yuri   |        1339 |
+
+		
+******************************************************************************************************************************************************************
+
+8. Does posing more reviews correlate with more fans? 
+
+Yes, posing more reviews correlate with more fans but it also depends on the quality of reviews. Some users have  more review count but the number of fans are less.
+
+Please explain your findings and interpretation of the results:
+
+### SQL code used to arrive at answer:
+```
+SELECT  name,
+	    review_count,
+	    fans,
+	    yelping_since
+FROM user
+ORDER BY fans DESC
+LIMIT 10;
+```
+
+| name      | review_count | fans | yelping_since       |
+|-----------|--------------|------|---------------------|
+| Amy       |          609 |  503 | 2007-07-19 00:00:00 |
+| Mimi      |          968 |  497 | 2011-03-30 00:00:00 |
+| Harald    |         1153 |  311 | 2012-11-27 00:00:00 |
+| Gerald    |         2000 |  253 | 2012-12-16 00:00:00 |
+| Christine |          930 |  173 | 2009-07-08 00:00:00 |
+| Lisa      |          813 |  159 | 2009-10-05 00:00:00 |
+| Cat       |          377 |  133 | 2009-02-05 00:00:00 |
+| William   |         1215 |  126 | 2015-02-19 00:00:00 |
+| Fran      |          862 |  124 | 2012-04-05 00:00:00 |
+| Lissa     |          834 |  120 | 2007-08-14 00:00:00 |
++-----------+--------------+------+---------------------+
+
+
+******************************************************************************************************************************************************************
+	
+9. Are there more reviews with the word "love" or with the word "hate" in them?
+
+Answer: love has 1780, while hate only has 232    
+
+
+SQL code used to arrive at answer:
+	
+```
+SELECT (
+		SELECT count(TEXT)
+		FROM review
+		WHERE TEXT LIKE '%love%'
+		) AS love_count,
+	(
+		SELECT count(TEXT)
+		FROM review
+		WHERE TEXT LIKE '%hate%'
+		) AS hate_count;
+```
+       
+
+| love_count | hate_count |
+|------------|------------|
+|       1780 |        232 |
+
+
+******************************************************************************************************************************************************************
+	
+10. Find the top 10 users with the most fans:
+
+### SQL code used to arrive at answer:
+
+```
+SELECT name,fans
+FROM user order BY fans DESC limit 10; 
+```
+	
+| name      | fans |
+|-----------|------|
+| Amy       |  503 |
+| Mimi      |  497 |
+| Harald    |  311 |
+| Gerald    |  253 |
+| Christine |  173 |
+| Lisa      |  159 |
+| Cat       |  133 |
+| William   |  126 |
+| Fran      |  124 |
+| Lissa     |  120 |
+
+******************************************************************************************************************************************************************
+
+11. Is there a strong correlation between having a high number of fans and being listed as "useful" or "funny?" 
+	
+Answer: Yes, see interpretation.
+	
+### SQL code used to arrive at answer:
+	
+```
+SELECT name,
+       fans,
+       useful,
+       funny,
+       review_count,
+       yelping_since
+FROM user
+ORDER BY fans DESC
+Limit 10;
+```
+
+| name      | fans | useful |  funny | review_count | yelping_since       |
+|-----------|------|--------|--------|--------------|---------------------|
+| Amy       |  503 |   3226 |   2554 |          609 | 2007-07-19 00:00:00 |
+| Mimi      |  497 |    257 |    138 |          968 | 2011-03-30 00:00:00 |
+| Harald    |  311 | 122921 | 122419 |         1153 | 2012-11-27 00:00:00 |
+| Gerald    |  253 |  17524 |   2324 |         2000 | 2012-12-16 00:00:00 |
+| Christine |  173 |   4834 |   6646 |          930 | 2009-07-08 00:00:00 |
+| Lisa      |  159 |     48 |     13 |          813 | 2009-10-05 00:00:00 |
+| Cat       |  133 |   1062 |    672 |          377 | 2009-02-05 00:00:00 |
+| William   |  126 |   9363 |   9361 |         1215 | 2015-02-19 00:00:00 |
+| Fran      |  124 |   9851 |   7606 |          862 | 2012-04-05 00:00:00 |
+| Lissa     |  120 |    455 |    150 |          834 | 2007-08-14 00:00:00 |
+
+	
+Please explain your findings and interpretation of the results:
+		
+Yes, but there seems to be a big outlier, number three **Harald**. 
+
+Zero other users seem to have a more `useful` and `funny` correlation results in more fans, but also in conjunction with review_count and time they have been screaming.
+        
+******************************************************************************************************************************************************************
+
+Part 2: Inferences and Analysis.
+
+1. Pick one city and category of your choice and group the businesses in that city or category by their overall star rating. Compare the businesses with 2-3 stars to the businesses with 4-5 stars and answer the following questions. Include your code.
+	
+i. Do the two groups you chose to analyze have a different distribution of hours?
+
+ratings operates for longer hoursthan the one with 4-5 star ratings.
+
+ii. Do the two groups you chose to analyze have a different number of reviews?
+        Yes they have different number of reviews. 
+         
+iii. Are you able to infer anything from the location data provided between these two groups? Explain.
+
+No, I wasn't able to infer anything since two groups had different zipcodes.
+
+SQL code used for analysis:
+
+SELECT B.name
+	,C.category
+	,B.city
+	,B.postal_code AS zipcode hours
+	,CASE 
+		WHEN stars BETWEEN 2
+				AND 3
+			THEN '2-3 stars'
+		WHEN stars BETWEEN 4
+				AND 5
+			THEN '4-5 stars'
+		END AS rating
+	,B.review_count AS reviews
+FROM business B
+INNER JOIN hours H ON B.id = H.business_id
+INNER JOIN category C ON C.business_id = B.id
+WHERE city = 'Phoenix'
+	AND category = 'Restaurants'
+	AND rating IN (
+		'2-3stars'
+		,'4-5 stars'
+		)
+GROUP BY name
+ORDER BY stars DESC;
+		
+2. Group business based on the ones that are open and the ones that are closed. What differences can you find between the ones that are still open and the ones that are closed? List at least two differences and the SQL code you used to arrive at your answer.
+		
+i. Difference 1:
+
+The average review count was 9 points more for businesses that is open than the business that is closed.
+	 
+******************************************************************************************************************************************************************
+         
+ii. Difference 2:
+
+The number of distinguished business_id for the one that is open is 5 times greater than the business that is closed, and therefore the
+the average review count is higher for companies that are open.
+         
+SQL code used for analysis:
+
+SELECT COUNT(DISTINCT id)
+	,COUNT(DISTINCT city)
+	,AVG(stars)
+	,AVG(review_count)
+	,is_open
+FROM business
+GROUP BY is_open;
+
+******************************************************************************************************************************************************************
+
+3. For this last part of your analysis, you are going to choose the type of analysis you want to conduct on the Yelp dataset and are going to prepare the data for analysis.
+
+Ideas for analysis include: Parsing out keywords and business attributes for sentiment analysis, clustering businesses to find commonalities or anomalies between them, predicting the overall star rating for a business, predicting the number of fans a user will have, and so on. These are just a few examples to get you started, so feel free to be creative and come up with your own problem you want to solve. Provide answers, in-line, to all of the following:
+	
+i. Indicate the type of analysis you chose to do:
+
+I chose to analyze whether companies like restaurants with attributes such as 'goodforkids', 'alcohol', and 'free Wi-Fi'
+either way relates to the number of stars or the comment counts they receive. I particularly chose the state 'Arizona' as this state has more
+number of restaurants, has review counts ranging from lowest to highest, and ratings from 2 to 4.5 stars for my review.
+         
+******************************************************************************************************************************************************************
+	 
+ii. Write 1-2 brief paragraphs on the type of data you will need for your analysis and why you chose that data:
+                           
+I used 3 tables as business, category, and attribute for my analysis.
+I chose the name of the company, its category, the state in which they run, the attributes they have, their ratings, and their count of
+assessments. I took variables like:
+
+1) Name, state, stars, review_count from table business;
+2) Table category;
+3) Name, the value from the attribute table.
+
+To connect all 3 tables. I used primary keys like business id, category business_id and
+business_id from the attribute table.
+                 
+I wish I knew how to have free Wi-Fi or kid-friendly restaurants or have a full bar or have any combination of 2 or all of the attributes
+contributions to a good rating or have more comments in private.  
+	       
+******************************************************************************************************************************************************************
+
+iii. Output of your finished dataset:
+         
++----------------------------------------+-------------+---------------+-------+-------+--------------+
+| name                                   | name        | value         | state | stars | review_count |
++----------------------------------------+-------------+---------------+-------+-------+--------------+
+| Charlie D's Catfish & Chicken          | Alcohol     | none          | AZ    |   4.5 |            7 |
+| Charlie D's Catfish & Chicken          | WiFi        | no            | AZ    |   4.5 |            7 |
+| Charlie D's Catfish & Chicken          | GoodForKids | 1             | AZ    |   4.5 |            7 |
+| Bootleggers Modern American Smokehouse | Alcohol     | full_bar      | AZ    |   4.0 |          431 |
+| Bootleggers Modern American Smokehouse | WiFi        | no            | AZ    |   4.0 |          431 |
+| Bootleggers Modern American Smokehouse | GoodForKids | 1             | AZ    |   4.0 |          431 |
+| The Cider Mill                         | Alcohol     | full_bar      | AZ    |   4.0 |           91 |
+| The Cider Mill                         | WiFi        | no            | AZ    |   4.0 |           91 |
+| The Cider Mill                         | GoodForKids | 1             | AZ    |   4.0 |           91 |
+| Nabers Music, Bar & Eats               | Alcohol     | full_bar      | AZ    |   4.0 |           75 |
+| Senor Taco                             | Alcohol     | none          | AZ    |   3.5 |           83 |
+| Senor Taco                             | WiFi        | no            | AZ    |   3.5 |           83 |
+| Senor Taco                             | GoodForKids | 1             | AZ    |   3.5 |           83 |
+| Five Guys                              | Alcohol     | none          | AZ    |   3.5 |           63 |
+| Five Guys                              | WiFi        | no            | AZ    |   3.5 |           63 |
+| Five Guys                              | GoodForKids | 1             | AZ    |   3.5 |           63 |
+| Gallagher's                            | Alcohol     | full_bar      | AZ    |   3.0 |           60 |
+| Gallagher's                            | WiFi        | free          | AZ    |   3.0 |           60 |
+| Gallagher's                            | GoodForKids | 1             | AZ    |   3.0 |           60 |
+| Mango Flats                            | Alcohol     | beer_and_wine | AZ    |   2.5 |            5 |
+| Mango Flats                            | WiFi        | free          | AZ    |   2.5 |            5 |
+| Mango Flats                            | GoodForKids | 1             | AZ    |   2.5 |            5 |
+| Famous Sam's                           | Alcohol     | full_bar      | AZ    |   2.5 |            3 |
+| Famous Sam's                           | GoodForKids | 0             | AZ    |   2.5 |            3 |
+| McDonald's                             | Alcohol     | none          | AZ    |   2.0 |            8 |
+| McDonald's                             | WiFi        | free          | AZ    |   2.0 |            8 |
+| McDonald's                             | GoodForKids | 1             | AZ    |   2.0 |            8 |
++----------------------------------------+-------------+---------------+-------+-------+--------------+
+
+iv. Provide the SQL code you used to create your final dataset:
+
+SELECT b.name AS business
+	,a.name AS attribute
+	,a.value
+	,b.STATE
+	,b.stars
+	,b.review_count
+FROM business b
+INNER JOIN category c ON c.business_id = b.id
+INNER JOIN attribute a ON a.business_id = b.id
+WHERE (
+		a.name LIKE 'alcohol'
+		OR a.name LIKE 'wifi'
+		OR a.name LIKE 'goodforkids'
+		)
+	AND category = 'Restaurants'
+	AND b.STATE = 'AZ'
+ORDER BY stars DESC
+	,review_count
