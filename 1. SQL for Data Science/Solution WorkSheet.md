@@ -129,7 +129,7 @@ ORDER BY sum(review_count) DESC;
 	
 ### 6. Find the distribution of star ratings to the business in the following cities:
 
-### i. Avon
+#### i. Avon
 
 #### SQL Query:
 
@@ -152,7 +152,7 @@ GROUP BY stars;
 
 ******************************************************************************************************************************************************************
 
-### ii. Beachwood
+#### ii. Beachwood
 
 ### SQL Query:
 
@@ -317,158 +317,151 @@ Please explain your findings and interpretation of the results:
 		
 Yes, but there seems to be a big outlier, number three **Harald**. 
 
-Zero other users seem to have a more `useful` and `funny` correlation results in more fans, but also in conjunction with review_count and time they have been screaming.
+Users seem to have a more `useful` and `funny` correlation results in more fans, but also in conjunction with review_count and time they have been yelping.
         
 ******************************************************************************************************************************************************************
 
-Part 2: Inferences and Analysis.
+## Part 2: Inferences and Analysis.
 
-1. Pick one city and category of your choice and group the businesses in that city or category by their overall star rating. Compare the businesses with 2-3 stars to the businesses with 4-5 stars and answer the following questions. Include your code.
+### 1. Pick one city and category of your choice and group the businesses in that city or category by their overall star rating. Compare the businesses with 2-3 stars to the businesses with 4-5 stars and answer the following questions. Include your code.
 	
-i. Do the two groups you chose to analyze have a different distribution of hours?
+#### i. Do the two groups you chose to analyze have a different distribution of hours?
 
-ratings operates for longer hoursthan the one with 4-5 star ratings.
+- The 4-5 star group seems to have shorter hours then the 2-3 star group.
 
-ii. Do the two groups you chose to analyze have a different number of reviews?
-        Yes they have different number of reviews. 
+#### ii. Do the two groups you chose to analyze have a different number of reviews?
+ - Yes and no, one of the 4-5 star group has a lot more reviews but then the other 4-5 star group has close to the same number of reviews as the 2-3 star group
          
-iii. Are you able to infer anything from the location data provided between these two groups? Explain.
+#### iii. Are you able to infer anything from the location data provided between these two groups? Explain.
 
-No, I wasn't able to infer anything since two groups had different zipcodes.
+-No, every business is in a different zip-code.
 
-SQL code used for analysis:
+#### SQL Query:
 
-SELECT B.name
-	,C.category
-	,B.city
-	,B.postal_code AS zipcode hours
-	,CASE 
-		WHEN stars BETWEEN 2
-				AND 3
-			THEN '2-3 stars'
-		WHEN stars BETWEEN 4
-				AND 5
-			THEN '4-5 stars'
-		END AS rating
-	,B.review_count AS reviews
-FROM business B
-INNER JOIN hours H ON B.id = H.business_id
-INNER JOIN category C ON C.business_id = B.id
-WHERE city = 'Phoenix'
-	AND category = 'Restaurants'
-	AND rating IN (
-		'2-3stars'
-		,'4-5 stars'
-		)
-GROUP BY name
-ORDER BY stars DESC;
+```
+SELECT B.name,
+	   B.review_count,
+	   H.hours,
+	   postal_code,
+        CASE
+            WHEN B.stars BETWEEN 2 AND 3 THEN '2-3 stars'
+            WHEN B.stars BETWEEN 4 AND 5 THEN '4-5 stars'
+        END AS star_rating
+FROM business B INNER JOIN hours H
+    ON B.id = H.business_id
+INNER JOIN category C
+    ON C.business_id = B.id
+WHERE (B.city == 'Phoenix'
+    AND
+    C.category LIKE 'Restaurants')
+    AND
+    (B.stars BETWEEN 2 AND 3
+    OR
+    B.stars BETWEEN 4 AND 5)
+GROUP BY stars
+ORDER BY star_rating ASC;
+
+```
+
+| name                                   | review_count | hours                | postal_code | star_rating |
+|----------------------------------------|--------------|----------------------|-------------|-------------|
+| McDonald's                             |            8 | Saturday|5:00-0:00   | 85004       | 2-3 stars   |
+| Gallagher's                            |           60 | Saturday|9:00-2:00   | 85024       | 2-3 stars   |
+| Bootleggers Modern American Smokehouse |          431 | Saturday|11:00-22:00 | 85028       | 4-5 stars   |
+| Charlie D's Catfish & Chicken          |            7 | Saturday|11:00-18:00 | 85034       | 4-5 stars   |
+
+
+
+### 2. Group business based on the ones that are open and the ones that are closed. What differences can you find between the ones that are still open and the ones that are closed? List at least two differences and the SQL code you used to arrive at your answer.
 		
-2. Group business based on the ones that are open and the ones that are closed. What differences can you find between the ones that are still open and the ones that are closed? List at least two differences and the SQL code you used to arrive at your answer.
-		
-i. Difference 1:
-
-The average review count was 9 points more for businesses that is open than the business that is closed.
+#### i. Difference 1:
+The number of open business  is 5 times greater than the business that is closed, and therefore the
+the average review count is higher for companies that are open.
 	 
 ******************************************************************************************************************************************************************
          
-ii. Difference 2:
-
-The number of distinguished business_id for the one that is open is 5 times greater than the business that is closed, and therefore the
-the average review count is higher for companies that are open.
-         
-SQL code used for analysis:
-
-SELECT COUNT(DISTINCT id)
-	,COUNT(DISTINCT city)
-	,AVG(stars)
-	,AVG(review_count)
-	,is_open
+#### ii. Difference 2:
+The average review count was 9 points more for businesses that is open than the business that is closed.
+       
+#### SQL Query:
+```
+SELECT COUNT(DISTINCT id),
+	   COUNT(DISTINCT city),
+	   AVG(stars),
+	   AVG(review_count),
+	   is_open
 FROM business
 GROUP BY is_open;
+```
 
 ******************************************************************************************************************************************************************
 
-3. For this last part of your analysis, you are going to choose the type of analysis you want to conduct on the Yelp dataset and are going to prepare the data for analysis.
+### 3. For this last part of your analysis, you are going to choose the type of analysis you want to conduct on the Yelp dataset and are going to prepare the data for analysis.
 
 Ideas for analysis include: Parsing out keywords and business attributes for sentiment analysis, clustering businesses to find commonalities or anomalies between them, predicting the overall star rating for a business, predicting the number of fans a user will have, and so on. These are just a few examples to get you started, so feel free to be creative and come up with your own problem you want to solve. Provide answers, in-line, to all of the following:
 	
-i. Indicate the type of analysis you chose to do:
+#### i. Indicate the type of analysis you chose to do:
 
-I chose to analyze whether companies like restaurants with attributes such as 'goodforkids', 'alcohol', and 'free Wi-Fi'
-either way relates to the number of stars or the comment counts they receive. I particularly chose the state 'Arizona' as this state has more
-number of restaurants, has review counts ranging from lowest to highest, and ratings from 2 to 4.5 stars for my review.
+Predicting the number of fans a user will have is an interesting problem to consider according to me.
          
 ******************************************************************************************************************************************************************
 	 
-ii. Write 1-2 brief paragraphs on the type of data you will need for your analysis and why you chose that data:
+#### ii. Write 1-2 brief paragraphs on the type of data you will need for your analysis and why you chose that data:
                            
-I used 3 tables as business, category, and attribute for my analysis.
-I chose the name of the company, its category, the state in which they run, the attributes they have, their ratings, and their count of
-assessments. I took variables like:
+After studying the ER diagram, there are a few points that came to mind that can be useful for predicting the number of fans a user will have like the number of useful reviews, years active on yelp, whether he/she is an elite member and for how long, compliments received from users etc. There could have been a lot of other analysis that could have been done based on other factors like the quality of the review made, review sentiment analysis, rating of the business for which the review was made etc. but I haven’t considered all these in the current analysis.
 
-1) Name, state, stars, review_count from table business;
-2) Table category;
-3) Name, the value from the attribute table.
+The result of the analysis are as follows:
+- Being an elite member doesn’t have much of an effect on the number of fans as most of the high fan user weren’t elite members ever.
+- On an average, a user has been on yelp for 9 years.
+- Now for fan prediction, it seems on an average each review can count towards 0.033 fans i.e. on an average one can expect 1 fan for every 30 reviews posted
+- Other observations are, on an average, one can expect 1 fan for every 4 rating for usefulness given by users and on average 1 fan for every 5.5 rating for compliment given by users
 
-To connect all 3 tables. I used primary keys like business id, category business_id and
-business_id from the attribute table.
-                 
-I wish I knew how to have free Wi-Fi or kid-friendly restaurants or have a full bar or have any combination of 2 or all of the attributes
-contributions to a good rating or have more comments in private.  
 	       
 ******************************************************************************************************************************************************************
 
-iii. Output of your finished dataset:
-         
-+----------------------------------------+-------------+---------------+-------+-------+--------------+
-| name                                   | name        | value         | state | stars | review_count |
-+----------------------------------------+-------------+---------------+-------+-------+--------------+
-| Charlie D's Catfish & Chicken          | Alcohol     | none          | AZ    |   4.5 |            7 |
-| Charlie D's Catfish & Chicken          | WiFi        | no            | AZ    |   4.5 |            7 |
-| Charlie D's Catfish & Chicken          | GoodForKids | 1             | AZ    |   4.5 |            7 |
-| Bootleggers Modern American Smokehouse | Alcohol     | full_bar      | AZ    |   4.0 |          431 |
-| Bootleggers Modern American Smokehouse | WiFi        | no            | AZ    |   4.0 |          431 |
-| Bootleggers Modern American Smokehouse | GoodForKids | 1             | AZ    |   4.0 |          431 |
-| The Cider Mill                         | Alcohol     | full_bar      | AZ    |   4.0 |           91 |
-| The Cider Mill                         | WiFi        | no            | AZ    |   4.0 |           91 |
-| The Cider Mill                         | GoodForKids | 1             | AZ    |   4.0 |           91 |
-| Nabers Music, Bar & Eats               | Alcohol     | full_bar      | AZ    |   4.0 |           75 |
-| Senor Taco                             | Alcohol     | none          | AZ    |   3.5 |           83 |
-| Senor Taco                             | WiFi        | no            | AZ    |   3.5 |           83 |
-| Senor Taco                             | GoodForKids | 1             | AZ    |   3.5 |           83 |
-| Five Guys                              | Alcohol     | none          | AZ    |   3.5 |           63 |
-| Five Guys                              | WiFi        | no            | AZ    |   3.5 |           63 |
-| Five Guys                              | GoodForKids | 1             | AZ    |   3.5 |           63 |
-| Gallagher's                            | Alcohol     | full_bar      | AZ    |   3.0 |           60 |
-| Gallagher's                            | WiFi        | free          | AZ    |   3.0 |           60 |
-| Gallagher's                            | GoodForKids | 1             | AZ    |   3.0 |           60 |
-| Mango Flats                            | Alcohol     | beer_and_wine | AZ    |   2.5 |            5 |
-| Mango Flats                            | WiFi        | free          | AZ    |   2.5 |            5 |
-| Mango Flats                            | GoodForKids | 1             | AZ    |   2.5 |            5 |
-| Famous Sam's                           | Alcohol     | full_bar      | AZ    |   2.5 |            3 |
-| Famous Sam's                           | GoodForKids | 0             | AZ    |   2.5 |            3 |
-| McDonald's                             | Alcohol     | none          | AZ    |   2.0 |            8 |
-| McDonald's                             | WiFi        | free          | AZ    |   2.0 |            8 |
-| McDonald's                             | GoodForKids | 1             | AZ    |   2.0 |            8 |
-+----------------------------------------+-------------+---------------+-------+-------+--------------+
+#### iii. Output of your finished dataset:
+#### SQL Query:        
+```
+SELECT
+	AVG(DATE('NOW')-yelping_since) AS years_active,
+	AVG(ROUND(fans*1.0/review_count,2)) as fans_per_review,
+	AVG(ROUND(fans*1.0/useful,2)) as fans_per_useful,
+	AVG(ROUND(fans*1.0/(funny+cool+compliment_hot+ compliment_more+ compliment_profile+ compliment_cute+ compliment_list + compliment_note + compliment_plain + compliment_cool + compliment_funny + compliment_writer + compliment_photos),2)) AS fans_per_compliment
+FROM user;
+
+
+
+| years_active | fans_per_review | fans_per_useful | fans_per_compliment |
+|--------------|-----------------|-----------------|---------------------|
+|       9.1995 | 0.0329976979281 |  0.240480232298 |      0.179715921136 |
+
+```
 
 iv. Provide the SQL code you used to create your final dataset:
+```
+SELECT
+	name,
+	DATE('NOW')-yelping_since AS years_active,
+	(MAX(year)-MIN(year)) AS elite_year,
+	ROUND(fans*1.0/review_count,2) as fans_per_review,
+	ROUND(fans*1.0/useful,2) as fans_per_useful,
+	ROUND(fans*1.0/(funny+cool+compliment_hot+ compliment_more+ compliment_profile+ compliment_cute+ compliment_list + compliment_note + compliment_plain + compliment_cool + compliment_funny + compliment_writer + compliment_photos),2) AS fans_per_compliment
 
-SELECT b.name AS business
-	,a.name AS attribute
-	,a.value
-	,b.STATE
-	,b.stars
-	,b.review_count
-FROM business b
-INNER JOIN category c ON c.business_id = b.id
-INNER JOIN attribute a ON a.business_id = b.id
-WHERE (
-		a.name LIKE 'alcohol'
-		OR a.name LIKE 'wifi'
-		OR a.name LIKE 'goodforkids'
-		)
-	AND category = 'Restaurants'
-	AND b.STATE = 'AZ'
-ORDER BY stars DESC
-	,review_count
+FROM user LEFT JOIN elite_years
+    ON user.id=elite_years.user_id
+GROUP BY name
+ORDER BY review_count DESC
+LIMIT 10
+```
+| name    | years_active | elite_year | fans_per_review | fans_per_useful | fans_per_compliment |
+|---------|--------------|------------|-----------------|-----------------|---------------------|
+| Gerald  |           10 |       None |            0.13 |            0.01 |                0.01 |
+| .Hon    |           16 |       None |            0.08 |            0.01 |                0.01 |
+| eric    |           15 |       None |            0.01 |            16.0 |                0.24 |
+| Roanna  |           16 |       None |             0.1 |            0.03 |                0.02 |
+| Ed      |           13 |          7 |            0.04 |            0.27 |                0.13 |
+| Dominic |           11 |          6 |            0.04 |            0.46 |                0.13 |
+| Lissa   |           15 |          8 |            0.14 |            0.26 |                0.04 |
+| Alison  |           15 |       None |            0.08 |             0.2 |                0.03 |
+| Sui     |           13 |       None |             0.1 |            8.67 |                0.27 |
+| Crissy  |           14 |       None |            0.04 |            6.25 |                0.24 |
