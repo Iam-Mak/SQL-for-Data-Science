@@ -4,56 +4,56 @@
 
 ## Part 1: Yelp Dataset Profiling and Understanding.
 
-1. Profile the data by finding the total number of records for each of the tables below:
+### 1. Profile the data by finding the total number of records for each of the tables below:
 	
-- i. Attribute table = 10000
-- ii. Business table = 10000
-- iii. Category table = 10000
-- iv. Checkin table = 10000
-- v. elite_years table = 10000
-- vi. friend table = 10000
-- vii. hours table = 10000
-- viii. photo table = 10000 
-- ix. review table = 10000 
-- x. tip table = 10000
-- xi. user table = 10000
+- Attribute table = 10000
+- Business table = 10000
+- Category table = 10000
+- Checkin table = 10000
+- elite_years table = 10000
+- friend table = 10000
+- hours table = 10000
+- photo table = 10000 
+- review table = 10000 
+- tip table = 10000
+- user table = 10000
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 ```
 SELECT COUNT(*)
-FROM table_name (Table names are found in the schema.)
+FROM table_name
 ```
 
 ******************************************************************************************************************************************************************
 
-2. Find the total distinct records by either the foreign key or primary key for each table. If two foreign keys are listed in the table, please specify which foreign key.
+### 2. Find the total distinct records by either the foreign key or primary key for each table. If two foreign keys are listed in the table, please specify which foreign key.
 
-- i. Business = 10000 (id)
-- ii. Hours = 1562 (business_id) 
-- iii. Category = 2643 (business_id_
-- iv. Attribute = 1115 (business_id)
-- v. Review = 10000 (id) , 8090 (business_id)
-- vi. Checkin = 493 (business_id)
-- vii. Photo = 10000 (id), 6493 (business_id)
-- viii. Tip = 537 (user_id), 3979 (business_id)
-- ix. User = 10000 (id)
-- x. Friend = 11 (user_id)
-- xi. Elite_years = 2780 (user_id)
+- Business = 10000 (id)
+- Hours = 1562 (business_id) 
+-  Category = 2643 (business_id_
+- Attribute = 1115 (business_id)
+- Review = 10000 (id) , 8090 (business_id)
+- Checkin = 493 (business_id)
+- Photo = 10000 (id), 6493 (business_id)
+- Tip = 537 (user_id), 3979 (business_id)
+- User = 10000 (id)
+- Friend = 11 (user_id)
+- Elite_years = 2780 (user_id)
 
 *Note: Primary Keys are denoted in the ER-Diagram with a yellow key icon.*
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 ```
 SELECT COUNT(DISTINCT(key))
-FROM table_name (Table names are found in the schema.)
+FROM table_name 
 ```
 ******************************************************************************************************************************************************************
 
-3. Are there any columns with null values in the Users table? Indicate "yes," or "no."
+### 3. Are there any columns with null values in the Users table? Indicate "yes," or "no."
 
 - Answer: No
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 ``` 
 SELECT *
 FROM user
@@ -70,7 +70,7 @@ WHERE id IS NULL  OR name IS NULL
  ```                                 
 ******************************************************************************************************************************************************************
 	
-4. For each table and column listed below, display the smallest (minimum), largest (maximum), and average (mean) value for the following fields:
+### 4. For each table and column listed below, display the smallest (minimum), largest (maximum), and average (mean) value for the following fields:
 
 i. Table: Review, Column: Stars
 
@@ -92,23 +92,25 @@ v. Table: User, Column: Review_count
 
     min:0		 max:200	   avg:24.2995
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 ```
-SELECT min(stars),max (stars), avg(stars)
+SELECT min(stars),
+       max (stars), 
+       avg(stars)
 FROM table_name
 ```
 ******************************************************************************************************************************************************************
 
 5. List the cities with the most reviews in descending order:
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 ```
-SELECT city, sum(review_count)
+SELECT city, 
+       sum(review_count)
 FROM business
 GROUP BY city
 ORDER BY sum(review_count) DESC;
 ```	
-
 
 | city             | NoOfReviews |
 |------------------|--------------|
@@ -123,19 +125,17 @@ ORDER BY sum(review_count) DESC;
 | Phoenix          |         711 |
 | Mississauga      |         683 |
 
-
-(Output limit exceeded, 10 of 362 total rows shown)
-
 ******************************************************************************************************************************************************************
 	
-6. Find the distribution of star ratings to the business in the following cities:
+### 6. Find the distribution of star ratings to the business in the following cities:
 
-i. Avon
+### i. Avon
 
-## SQL code used to arrive at answer:
+#### SQL Query:
 
 ```
-SELECT stars AS StarRating ,count(stars) AS frequency
+SELECT stars AS StarRating,
+       count(stars) AS frequency
 FROM business
 WHERE city = 'Avon'
 GROUP BY stars;
@@ -152,12 +152,13 @@ GROUP BY stars;
 
 ******************************************************************************************************************************************************************
 
-ii. Beachwood
+### ii. Beachwood
 
-### SQL code used to arrive at answer:
+### SQL Query:
 
 ```
-SELECT stars AS StarRating, count(stars) AS frequency
+SELECT stars AS StarRating, 
+       count(stars) AS frequency
 FROM business 
 WHERE city = 'Beachwood'
 GROUP BY stars;
@@ -176,17 +177,17 @@ GROUP BY stars;
 
 ******************************************************************************************************************************************************************
 
-7. Find the top 3 users based on their total number of reviews:
+### 7. Find the top 3 users based on their total number of reviews:
 		
-### SQL code used to arrive at answer:
+#### SQL Query:
 
 ```
-SELECT name ,review_count AS tota_review
+SELECT name ,
+       review_count AS tota_review
 FROM user
 ORDER BY review_count DESC limit 3;
 ```
 		
-
 | name   | tota_review |
 |--------|-------------|
 | Gerald |        2000 |
@@ -196,13 +197,13 @@ ORDER BY review_count DESC limit 3;
 		
 ******************************************************************************************************************************************************************
 
-8. Does posing more reviews correlate with more fans? 
+### 8. Does posing more reviews correlate with more fans? 
 
 Yes, posing more reviews correlate with more fans but it also depends on the quality of reviews. Some users have  more review count but the number of fans are less.
 
 Please explain your findings and interpretation of the results:
 
-### SQL code used to arrive at answer:
+### SQL Query:
 ```
 SELECT  name,
 	    review_count,
@@ -225,31 +226,29 @@ LIMIT 10;
 | William   |         1215 |  126 | 2015-02-19 00:00:00 |
 | Fran      |          862 |  124 | 2012-04-05 00:00:00 |
 | Lissa     |          834 |  120 | 2007-08-14 00:00:00 |
-+-----------+--------------+------+---------------------+
 
 
 ******************************************************************************************************************************************************************
 	
-9. Are there more reviews with the word "love" or with the word "hate" in them?
+### 9. Are there more reviews with the word "love" or with the word "hate" in them?
 
 Answer: love has 1780, while hate only has 232    
 
 
-SQL code used to arrive at answer:
+#### SQL Query:
 	
 ```
 SELECT (
-		SELECT count(TEXT)
-		FROM review
-		WHERE TEXT LIKE '%love%'
-		) AS love_count,
-	(
-		SELECT count(TEXT)
-		FROM review
-		WHERE TEXT LIKE '%hate%'
-		) AS hate_count;
-```
-       
+            SELECT count(TEXT)
+            FROM review
+            WHERE TEXT LIKE '%love%'`
+	   )  AS love_count,
+	   (
+            SELECT count(TEXT)
+            FROM review
+            WHERE TEXT LIKE '%hate%'
+	   )  AS hate_count;
+```   
 
 | love_count | hate_count |
 |------------|------------|
@@ -258,9 +257,9 @@ SELECT (
 
 ******************************************************************************************************************************************************************
 	
-10. Find the top 10 users with the most fans:
+### 10. Find the top 10 users with the most fans:
 
-### SQL code used to arrive at answer:
+#### SQL Query:
 
 ```
 SELECT name,fans
@@ -282,11 +281,11 @@ FROM user order BY fans DESC limit 10;
 
 ******************************************************************************************************************************************************************
 
-11. Is there a strong correlation between having a high number of fans and being listed as "useful" or "funny?" 
+### 11. Is there a strong correlation between having a high number of fans and being listed as "useful" or "funny?" 
 	
 Answer: Yes, see interpretation.
 	
-### SQL code used to arrive at answer:
+### SQL Query:
 	
 ```
 SELECT name,
